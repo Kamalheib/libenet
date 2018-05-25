@@ -16,6 +16,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 #include "common.h"
@@ -24,13 +25,25 @@
 struct enet_dev *enet_open_dev(uint16_t domain, uint8_t bus,
 			       uint8_t dev, uint8_t func)
 {
+	struct enet_dev *device;
+
 	pr_info("%s called\n", __func__);
-	return NULL;
+	device = malloc(sizeof(struct enet_dev));
+	if (!device)
+		return NULL;
+
+	device->domain = domain;
+	device->bus = bus;
+	device->dev = dev;
+	device->func = func;
+
+	return device;
 }
 
 void enet_close_dev(struct enet_dev *dev)
 {
 	pr_info("%s called\n", __func__);
+	free(dev);
 }
 
 int enet_write_reg(struct enet_dev *dev, uint64_t addr, uint64_t val)
