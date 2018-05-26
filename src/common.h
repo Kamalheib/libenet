@@ -21,9 +21,19 @@
 #define pr_info(fmt, ...) \
 	fprintf(stdout, "%s info: " fmt, prefix, ## __VA_ARGS__);
 
+#define PCI_MAX_BARS 6
+
+struct enet_pci_bar {
+	int fd;
+	void *base;
+	uint32_t size;
+};
+
 struct enet_dev {
 	uint16_t domain;
 	uint8_t bus;
 	uint8_t dev;
 	uint8_t func;
+
+	struct enet_pci_bar bar[PCI_MAX_BARS];
 };

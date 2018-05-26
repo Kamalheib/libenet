@@ -20,6 +20,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "sysfs.h"
 #include "enet.h"
 
 struct enet_dev *enet_open_dev(uint16_t domain, uint8_t bus,
@@ -37,12 +38,37 @@ struct enet_dev *enet_open_dev(uint16_t domain, uint8_t bus,
 	device->dev = dev;
 	device->func = func;
 
+	if (!enet_sysfs_is_device_exit(device)) {
+		pr_err("Device not found\n");
+		goto free_dev;
+	}
+
+	if (enet_sysfs_open_resources(device)) {
+		pr_err("Failed to open resources\n");
+		goto close_res;
+	}
+
+	if (enet_sysfs_mmap_resources(device)) {
+		pr_err("Failed to mmap resources\n");
+		goto unmap;
+	}
+
 	return device;
+
+unmap:
+	enet_sysfs_unmap_resources(device);
+close_res:
+	enet_sysfs_close_resources(device);
+free_dev:
+	free(device);
+	return NULL;
 }
 
 void enet_close_dev(struct enet_dev *dev)
 {
 	pr_info("%s called\n", __func__);
+	enet_sysfs_unmap_resources(dev);
+	enet_sysfs_close_resources(dev);
 	free(dev);
 }
 
