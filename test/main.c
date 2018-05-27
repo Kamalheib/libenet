@@ -22,7 +22,9 @@
 
 int main(int argc, char **argv)
 {
+	int i;
 	struct enet_dev *dev;
+	uint32_t vals[] = {1, 2, 3, 4};
 
 	puts("Start testing libenet...");
 	dev = enet_open_dev(atoi(argv[1]), atoi(argv[2]),
@@ -30,6 +32,16 @@ int main(int argc, char **argv)
 	if (!dev) {
 		return 1;
 	}
+	enet_write_reg(dev, 0, 0x0, 4, vals);
+
+	for (i = 0; i < 4; i++)
+		printf("%u\n", vals[i]);
+
+	enet_read_reg(dev, 0, 0x0, 4, vals);
+
+	for (i = 0; i < 4; i++)
+		printf("%u\n", vals[i]);
+
 	enet_close_dev(dev);
 	puts("End testing libenet...");
 	return 0;
