@@ -28,7 +28,6 @@ struct enet_dev *enet_open_dev(uint16_t domain, uint8_t bus,
 {
 	struct enet_dev *device;
 
-	pr_info("%s called\n", __func__);
 	device = malloc(sizeof(struct enet_dev));
 	if (!device)
 		return NULL;
@@ -66,20 +65,26 @@ free_dev:
 
 void enet_close_dev(struct enet_dev *dev)
 {
-	pr_info("%s called\n", __func__);
 	enet_sysfs_unmap_resources(dev);
 	enet_sysfs_close_resources(dev);
 	free(dev);
 }
 
-int enet_write_reg(struct enet_dev *dev, uint64_t addr, uint64_t val)
+void enet_write_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
+		   uint32_t len, uint32_t *vals)
 {
-	pr_info("%s called\n", __func__);
-	return -1;
+	int i;
+
+	for (i = 0; i < len; i++)
+		*((uint32_t *)dev->bar[bar].base + addr) = vals[i];
 }
 
-int enet_read_reg(struct enet_dev *dev, uint64_t addr, uint64_t *data)
+void enet_read_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
+		  uint32_t len, uint32_t *data)
 {
-	pr_info("%s called\n", __func__);
-	return -1;
+	int i;
+
+	for (i = 0; i < len; i++)
+		data[i] = *((uint32_t *)dev->bar[bar].base + addr);
+
 }
