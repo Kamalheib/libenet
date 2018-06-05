@@ -25,6 +25,7 @@
 
 #define PCI_DEVICE_DIR "/sys/bus/pci/devices/%04u:%02u:%02u.%u/"
 #define PCI_DEVICE_RES "/sys/bus/pci/devices/%04u:%02u:%02u.%u/resource%d"
+#define PCI_DEVICE_EN "/sys/bus/pci/devices/%04u:%02u:%02u.%u/enable"
 
 int enet_sysfs_is_device_exit(struct enet_dev *dev)
 {
@@ -36,6 +37,48 @@ int enet_sysfs_is_device_exit(struct enet_dev *dev)
 
 	if (!stat(path, &sb))
 		return 1;
+
+	return 0;
+}
+
+int enet_sysfs_is_device_enabled(struct enet_dev *dev)
+{
+	char path[100];
+	char val;
+	int fd;
+
+	pr_info("%s Called\n", __func__);
+	sprintf(path, PCI_DEVICE_EN, dev->domain,
+		dev->bus, dev->dev, dev->func);
+
+	fd = open(path, O_RDONLY);
+	if (!fd) {
+		pr_err("Failed to open %s\n", path);
+		return -1;
+	}
+
+	read(fd, &val, 1);
+
+	return val == '1' ? 1 : 0;
+}
+
+int enet_sysfs_enable_device(struct enet_dev *dev)
+{
+	char path[100];
+	int fd;
+
+	pr_info("%s Called\n", __func__);
+	sprintf(path, PCI_DEVICE_EN, dev->domain,
+		dev->bus, dev->dev, dev->func);
+
+	fd = open(path, O_RDWR);
+	if (!fd) {
+		pr_err("Failed to open %s\n", path);
+		return -1;
+	}
+
+	write(fd, "1", 1);
+	close(fd);
 
 	return 0;
 }

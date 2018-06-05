@@ -22,5 +22,7 @@ int enet_sysfs_open_resources(struct enet_dev *dev);
 void enet_sysfs_close_resources(struct enet_dev *dev);
 int enet_sysfs_mmap_resources(struct enet_dev *dev);
 void enet_sysfs_unmap_resources(struct enet_dev *dev);
+int enet_sysfs_is_device_enabled(struct enet_dev *dev);
+int enet_sysfs_enable_device(struct enet_dev *dev);
 
 #endif /* _SYSFS_H_ */

@@ -27,6 +27,7 @@ struct enet_dev *enet_open_dev(uint16_t domain, uint8_t bus,
 			       uint8_t dev, uint8_t func)
 {
 	struct enet_dev *device;
+	int enabled;
 
 	device = malloc(sizeof(struct enet_dev));
 	if (!device)
@@ -41,6 +42,22 @@ struct enet_dev *enet_open_dev(uint16_t domain, uint8_t bus,
 		pr_err("Device not found\n");
 		goto free_dev;
 	}
+
+	enabled = enet_sysfs_is_device_enabled(device);
+	if (enabled == -1) {
+		pr_err("Failed to open device\n");
+		goto free_dev;
+	}
+
+	if (!enabled) {
+		int rv = enet_sysfs_enable_device(device);
+
+		if (rv == -1) {
+			pr_err("Failed to enabled device\n");
+			goto free_dev;
+		}
+	}
+
 
 	if (enet_sysfs_open_resources(device)) {
 		pr_err("Failed to open resources\n");
