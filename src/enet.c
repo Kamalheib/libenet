@@ -87,27 +87,36 @@ void enet_close_dev(struct enet_dev *dev)
 	free(dev);
 }
 
-void enet_write_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
+int enet_write_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
 		   uint32_t len, uint32_t *vals)
 {
 	void *virt_addr;
 	int i;
 
+	if (!dev->bar[bar].fd)
+		return 1;
+
 	virt_addr = dev->bar[bar].base + (addr & (dev->bar[bar].size - 1));
 
 	for (i = 0; i < len; i++)
 		*((uint32_t *)virt_addr) = vals[i];
+
+	return 0;
 }
 
-void enet_read_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
+int enet_read_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
 		  uint32_t len, uint32_t *data)
 {
 	void *virt_addr;
 	int i;
+
+	if (!dev->bar[bar].fd)
+		return 1;
 
 	virt_addr = dev->bar[bar].base + (addr & (dev->bar[bar].size - 1));
 
 	for (i = 0; i < len; i++)
 		data[i] = *((uint32_t *)virt_addr);
 
+	return 0;
 }

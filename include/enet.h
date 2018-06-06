@@ -21,9 +21,9 @@ struct enet_dev;
 struct enet_dev *enet_open_dev(uint16_t domain, uint8_t bus,
 			       uint8_t dev, uint8_t func);
 void enet_close_dev(struct enet_dev *dev);
-void enet_write_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
+int enet_write_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
 		   uint32_t len, uint32_t *vals);
-void enet_read_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
+int enet_read_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
 		  uint32_t len, uint32_t *data);
 
 #endif /* _ENET_H_ */
