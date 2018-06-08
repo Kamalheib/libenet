@@ -30,8 +30,10 @@ struct enet_dev *enet_open_dev(uint16_t domain, uint8_t bus,
 	int enabled;
 
 	device = malloc(sizeof(struct enet_dev));
-	if (!device)
+	if (!device) {
+		pr_err("Failed to allocate device\n");
 		return NULL;
+	}
 
 	device->domain = domain;
 	device->bus = bus;
