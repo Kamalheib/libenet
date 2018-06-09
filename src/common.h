@@ -18,6 +18,13 @@
 #define prefix "libenet"
 #define pr_err(fmt, ...) \
 	fprintf(stderr, "%s error: " fmt, prefix, ## __VA_ARGS__);
+
+static int debug_flags = 0;
+#define pr_dbg(fmt, ...) do { \
+	if (debug_flags) \
+		fprintf(stdout, "%s debug: " fmt, prefix, ## __VA_ARGS__); \
+} while (0) \
+
 #define pr_info(fmt, ...) \
 	fprintf(stdout, "%s info: " fmt, prefix, ## __VA_ARGS__);
 

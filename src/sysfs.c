@@ -32,6 +32,8 @@ int enet_sysfs_is_device_exit(struct enet_dev *dev)
 	char path[100];
 	struct stat sb;
 
+	pr_dbg("%s Called\n", __func__);
+
 	sprintf(path, PCI_DEVICE_DIR, dev->domain,
 		dev->bus, dev->dev, dev->func);
 
@@ -47,7 +49,8 @@ int enet_sysfs_is_device_enabled(struct enet_dev *dev)
 	char val;
 	int fd;
 
-	pr_info("%s Called\n", __func__);
+	pr_dbg("%s Called\n", __func__);
+
 	sprintf(path, PCI_DEVICE_EN, dev->domain,
 		dev->bus, dev->dev, dev->func);
 
@@ -67,7 +70,8 @@ int enet_sysfs_enable_device(struct enet_dev *dev)
 	char path[100];
 	int fd;
 
-	pr_info("%s Called\n", __func__);
+	pr_dbg("%s Called\n", __func__);
+
 	sprintf(path, PCI_DEVICE_EN, dev->domain,
 		dev->bus, dev->dev, dev->func);
 
@@ -89,6 +93,7 @@ int enet_sysfs_open_resources(struct enet_dev *dev)
 	struct stat st;
 	int i;
 
+	pr_dbg("%s Called\n", __func__);
 
 	for (i = 0; i < PCI_MAX_BARS; i++) {
 		sprintf(path, PCI_DEVICE_RES, dev->domain,
@@ -118,6 +123,8 @@ void enet_sysfs_close_resources(struct enet_dev *dev)
 {
 	int i;
 
+	pr_dbg("%s Called\n", __func__);
+
 	for (i = 0; i < PCI_MAX_BARS; i++) {
 		if (dev->bar[i].fd)
 			close(dev->bar[i].fd);
@@ -128,6 +135,8 @@ int enet_sysfs_mmap_resources(struct enet_dev *dev)
 {
 	void *base;
 	int i;
+
+	pr_dbg("%s Called\n", __func__);
 
 	for(i = 0; i < PCI_MAX_BARS; i++) {
 		if (dev->bar[i].fd) {
@@ -150,6 +159,8 @@ int enet_sysfs_mmap_resources(struct enet_dev *dev)
 void enet_sysfs_unmap_resources(struct enet_dev *dev)
 {
 	int i;
+
+	pr_dbg("%s Called\n", __func__);
 
 	for (i = 0; i < PCI_MAX_BARS; i++) {
 		if (dev->bar[i].base) {

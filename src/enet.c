@@ -29,6 +29,8 @@ struct enet_dev *enet_open_dev(uint16_t domain, uint8_t bus,
 	struct enet_dev *device;
 	int enabled;
 
+	pr_dbg("%s Called\n", __func__);
+
 	device = malloc(sizeof(struct enet_dev));
 	if (!device) {
 		pr_err("Failed to allocate device\n");
@@ -84,6 +86,7 @@ free_dev:
 
 void enet_close_dev(struct enet_dev *dev)
 {
+	pr_dbg("%s Called\n", __func__);
 	enet_sysfs_unmap_resources(dev);
 	enet_sysfs_close_resources(dev);
 	free(dev);
