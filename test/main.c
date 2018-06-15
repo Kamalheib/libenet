@@ -17,14 +17,21 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <malloc.h>
 #include <stdio.h>
+#include <time.h>
 #include "enet.h"
+
+#define TRANSFER_SIZE (8 * 1024)
+#define RUNS 5000
 
 int main(int argc, char **argv)
 {
-	int i;
 	struct enet_dev *dev;
-	uint32_t vals[] = {1, 2, 3, 4};
+	clock_t start, end;
+	double ttime;
+	char *ma;
+	int i;
 
 	puts("Start testing libenet...");
 	dev = enet_open_dev(atoi(argv[1]), atoi(argv[2]),
@@ -32,15 +39,25 @@ int main(int argc, char **argv)
 	if (!dev) {
 		return 1;
 	}
-	enet_write_reg(dev, 0, 0x0, 4, vals);
 
-	for (i = 0; i < 4; i++)
-		printf("%u\n", vals[i]);
+	ma = memalign(4 * 1024, 8 * 1024);
+	if (!ma) {
+		puts("Error: Failed to allocate memory aligned\n");
+		enet_close_dev(dev);
+		return 1;
+	}
 
-	enet_read_reg(dev, 0, 0x0, 4, vals);
+	start = clock();
+	for (i = 0; i < RUNS; i++) {
+		enet_read_reg(dev, 0, 0, TRANSFER_SIZE/4, (uint32_t *)ma);
+	}
+	end = clock();
 
-	for (i = 0; i < 4; i++)
-		printf("%u\n", vals[i]);
+	ttime = ((double)(end - start) / CLOCKS_PER_SEC);
+
+	printf("Total time %f seconds to execute\n", ttime);
+	printf("Bandwidth %.2f Mbyte/sec\n", RUNS * (double) 8 * 1024 / ttime / 1000000.);
+
 
 	enet_close_dev(dev);
 	puts("End testing libenet...");
