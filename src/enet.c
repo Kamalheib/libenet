@@ -104,7 +104,7 @@ int enet_write_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
 	virt_addr = dev->bar[bar].base + (addr & (dev->bar[bar].size - 1));
 
 	for (i = 0; i < len; i++)
-		*((uint32_t *)virt_addr) = vals[i];
+		*((uint32_t *)virt_addr + i) = vals[i];
 
 	return 0;
 }
@@ -121,7 +121,7 @@ int enet_read_reg(struct enet_dev *dev, uint8_t bar, uint32_t addr,
 	virt_addr = dev->bar[bar].base + (addr & (dev->bar[bar].size - 1));
 
 	for (i = 0; i < len; i++)
-		data[i] = *((uint32_t *)virt_addr);
+		data[i] = *((uint32_t *)virt_addr + i);
 
 	return 0;
 }
