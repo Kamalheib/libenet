@@ -49,16 +49,31 @@ int main(int argc, char **argv)
 
 	start = clock();
 	for (i = 0; i < RUNS; i++) {
-		enet_read_reg(dev, 0, 0, TRANSFER_SIZE/4, (uint32_t *)ma);
+		enet_read_reg(dev, 0, 0, TRANSFER_SIZE / 4, (uint32_t *)ma);
 	}
 	end = clock();
 
 	ttime = ((double)(end - start) / CLOCKS_PER_SEC);
 
 	printf("Total time %f seconds to execute\n", ttime);
-	printf("Bandwidth %.2f Mbyte/sec\n", RUNS * (double) 8 * 1024 / ttime / 1000000.);
+	printf("Read bandwidth %.2f Mbyte/sec\n",
+	       RUNS * (double) (TRANSFER_SIZE / 4) / ttime / 1000000.);
 
 
+	start = clock();
+	for (i = 0; i < RUNS; i++) {
+		enet_write_reg(dev, 0, 0, TRANSFER_SIZE / 4, (uint32_t *)ma);
+	}
+	end = clock();
+
+	ttime = ((double)(end - start) / CLOCKS_PER_SEC);
+
+	printf("Total time %f seconds to execute\n", ttime);
+	printf("Write bandwidth %.2f Mbyte/sec\n",
+	       RUNS * (double) (TRANSFER_SIZE / 4) / ttime / 1000000.);
+
+
+	free(ma);
 	enet_close_dev(dev);
 	puts("End testing libenet...");
 	return 0;
