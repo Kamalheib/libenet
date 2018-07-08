@@ -79,10 +79,28 @@ static int write_indirect(struct enet_dev *dev, uint32_t addr, uint32_t val)
 	return 0;
 }
 
+int test_read_indirect(struct enet_dev *dev, uint32_t addr)
+{
+	uint32_t read_val;
+	int i;
+
+
+	for (i = 0; i < 1000000; i++) {
+		read_indirect(dev, addr, &read_val);
+
+		if (read_val != 0x8888aaaa) {
+			printf("Failed to test_read_indirect\n");
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	struct enet_dev *dev;
-	uint32_t addr = 0xc0;
+	uint32_t addr = 0x4a0;
 	uint32_t write_val = 0x12345678;
 	uint32_t reset_val = 0x8888aaaa;
 	uint32_t val;
@@ -101,10 +119,6 @@ int main(int argc, char **argv)
 
 	printf("Before write val=%#x\n", val);
 
-	if (write_indirect(dev, addr, write_val)) {
-		printf("Failed to write indirect\n");
-		return 1;
-	}
 
 	if (read_indirect(dev, addr, &val)) {
 		printf("Failed to read indirect\n");
@@ -112,11 +126,6 @@ int main(int argc, char **argv)
 	}
 
 	printf("After write val=%#x\n", val);
-
-	if (write_indirect(dev, addr, reset_val)) {
-		printf("Failed to write indirect\n");
-		return 1;
-	}
 
 	if (dev)
 		enet_close_dev(dev);
