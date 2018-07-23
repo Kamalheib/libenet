@@ -23,9 +23,9 @@
 
 #include "common.h"
 
-#define PCI_DEVICE_DIR "/sys/bus/pci/devices/%04u:%02u:%02u.%u/"
-#define PCI_DEVICE_RES "/sys/bus/pci/devices/%04u:%02u:%02u.%u/resource%d"
-#define PCI_DEVICE_EN "/sys/bus/pci/devices/%04u:%02u:%02u.%u/enable"
+#define PCI_DEVICE_DIR "/sys/bus/pci/devices/%04x:%02x:%02x.%x/"
+#define PCI_DEVICE_RES "/sys/bus/pci/devices/%04x:%02x:%02x.%x/resource%d"
+#define PCI_DEVICE_EN "/sys/bus/pci/devices/%04x:%02x:%02x.%x/enable"
 
 int enet_sysfs_is_device_exit(struct enet_dev *dev)
 {
