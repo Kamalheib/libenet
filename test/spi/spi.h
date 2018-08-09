@@ -39,6 +39,21 @@
 #define SPI_SR_RESET		0x5 /* Default TX/RX empty */
 #define SPI_SPICR_RESET		0x180 /* Default control register */
 
+
+/* SPI Control Register masks */
+
+#define SPI_REG_SPICR_LOOP_MASK			(1 << 0) /* Loopback enable */
+#define SPI_REG_SPICR_SPE_MASK			(1 << 1) /* System enable */
+#define SPI_REG_SPICR_MASTER_MASK		(1 << 2) /* Master enable */
+#define SPI_REG_SPICR_CPOL_MASK			(1 << 3) /* Clock polarity */
+#define SPI_REG_SPICR_CPHA_MASK			(1 << 4) /* Clock phase */
+#define SPI_REG_SPICR_TX_FIFO_RESET_MASK	(1 << 5) /* Reset TX register/FIFO */
+#define SPI_REG_SPICR_RX_FIFO_RESET_MASK	(1 << 6) /* Reset RX register/FIFO */
+#define SPI_REG_SPICR_MANUAL_SS_MASK		(1 << 7) /* Manual slave select */
+#define SPI_REG_SPICR_INHIBIT_MASK		(1 << 8) /* Master transaction inhibit */
+#define SPI_REG_SPICR_LSB_FIRST_MASK		(1 << 9) /* LSB fist data format */
+
+
 int spi_read_reg(struct enet_dev *dev, uint32_t addr, uint32_t *data);
 int spi_write_reg(struct enet_dev *dev, uint32_t addr, uint32_t data);
 

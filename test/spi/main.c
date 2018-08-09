@@ -17,16 +17,128 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "spi.h"
+
+static int spi_read_device_id(struct enet_dev *dev)
+{
+	uint32_t control_reg;
+	uint32_t status_reg;
+	uint32_t buffer[3];
+	uint32_t val;
+	int rc = 0;
+
+	rc = spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_SPICR, &control_reg);
+	if (rc) {
+		printf("Failed to read control register\n");
+		return 1;
+	}
+
+	control_reg |= 0x20 | 0x40 | 0x2 | 0x4;
+
+	rc = spi_write_reg(dev, SPI_BASE_ADDR + SPI_REG_SPICR, control_reg);
+	if (rc) {
+		printf("Failed to write control register\n");
+		return 1;
+	}
+
+	buffer[0] = 0x9f;
+	buffer[1] = 0x00;
+	buffer[2] = 0x00;
+
+	rc = spi_write_reg(dev, SPI_BASE_ADDR + SPI_REG_DTR, buffer[0]);
+	rc += spi_write_reg(dev, SPI_BASE_ADDR + SPI_REG_DTR, buffer[1]);
+	rc += spi_write_reg(dev, SPI_BASE_ADDR + SPI_REG_DTR, buffer[2]);
+	if (rc) {
+		printf("Failed to write flash read command\n");
+		return 1;
+	}
+
+	rc = spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_SPICR, &control_reg);
+	if (rc) {
+		printf("Failed to read control register\n");
+		return 1;
+	}
+
+	control_reg &= ~0x100;
+
+	rc = spi_write_reg(dev, SPI_BASE_ADDR + SPI_REG_SPICR, control_reg);
+	if (rc) {
+		printf("Failed to write control register\n");
+		return 1;
+	}
+
+	rc = spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_SPICR, &control_reg);
+	if (rc) {
+		printf("Failed to read control register\n");
+		return 1;
+	}
+
+	control_reg |= 0x100;
+
+	rc = spi_write_reg(dev, SPI_BASE_ADDR + SPI_REG_SPICR, control_reg);
+	if (rc) {
+		printf("Failed to write control register\n");
+		return 1;
+	}
+
+	rc = spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_SPISR, &status_reg);
+	if (rc) {
+		printf("Failed to read status register\n");
+		return 1;
+	}
+
+	if (!(status_reg & 0x1)) {
+		printf("We got data in RX\n");
+		rc = spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_DRR, &val);
+		if (rc) {
+			printf("Failed to read data\n");
+			return 1;
+		}
+
+		printf("val=%#x\n", val);
+	}
+
+	rc = spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_SPISR, &status_reg);
+	if (rc) {
+		printf("Failed to read status register\n");
+		return 1;
+	}
+
+	if (!(status_reg & 0x1)) {
+		printf("We got data in RX\n");
+		rc = spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_DRR, &val);
+		if (rc) {
+			printf("Failed to read data\n");
+			return 1;
+		}
+
+		printf("val=%#x\n", val);
+	}
+
+	rc = spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_SPISR, &status_reg);
+	if (rc) {
+		printf("Failed to read status register\n");
+		return 1;
+	}
+
+	if (!(status_reg & 0x1)) {
+		printf("We got data in RX\n");
+		rc = spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_DRR, &val);
+		if (rc) {
+			printf("Failed to read data\n");
+			return 1;
+		}
+
+		printf("val=%#x\n", val);
+	}
+
+	return 0;
+}
 
 int main(int argc, char **argv)
 {
 	struct enet_dev *dev;
-	uint32_t control_reg;
-	uint32_t status_reg;
-	uint32_t slave_select_reg;
-	uint32_t tx_fifo;
-	uint32_t rx_fifo;
 	int rc = 0;
 
 	dev = enet_open_dev(atoi(argv[1]), atoi(argv[2]),
@@ -36,61 +148,11 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (spi_write_reg(dev, SPI_BASE_ADDR + SPI_REG_SRR, SPI_SRR_RESET)) {
-		rc = 1;
-		printf("Failed to reset device\n");
+	rc = spi_read_device_id(dev);
+	if (rc)
 		goto out;
-	}
 
-	if (spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_SPICR, &control_reg)) {
-		rc = 1;
-		printf("Failed to read control register\n");
-		goto out;
-	}
-
-	if (control_reg != SPI_SPICR_RESET) {
-		rc = 1;
-		printf("Invalid control register value\n");
-		goto out;
-	}
-
-	printf("control register=%#x\n", control_reg);
-
-	if (spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_SPISR, &status_reg)) {
-		rc = 1;
-		printf("Failed to read status register\n");
-		goto out;
-	}
-
-	if ((status_reg & SPI_SR_RESET) != SPI_SR_RESET) {
-		rc = 1;
-		printf("Invalid status register value\n");
-		goto out;
-	}
-
-	printf("status register=%#x\n", status_reg);
-
-	if (spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_SPISSR, &slave_select_reg)) {
-		rc = 1;
-		printf("Failed to read slave select register\n");
-		goto out;
-	}
-
-	printf("slave select register=%#x\n", slave_select_reg);
-
-	if (spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_TFO, &tx_fifo)) {
-		rc = 1;
-		printf("Failed to read TX fifo occupancy\n");
-		goto out;
-	}
-
-	if (spi_read_reg(dev, SPI_BASE_ADDR + SPI_REG_RFO, &rx_fifo)) {
-		rc = 1;
-		printf("Failed to read RX fifo occupancy\n");
-		goto out;
-	}
-
-	printf("tx_fifo_occupancy=%#x rx_fifo_occupancy=%#x\n", tx_fifo, rx_fifo);
+	return 0;
 
 out:
 	if (dev)
