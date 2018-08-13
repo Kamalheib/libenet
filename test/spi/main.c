@@ -136,6 +136,19 @@ static int spi_read_device_id(struct enet_dev *dev)
 	return 0;
 }
 
+static int spi_software_reset(struct enet_dev *dev)
+{
+	int rc;
+
+	rc = spi_write_reg(dev, SPI_BASE_ADDR + SPI_REG_SRR, 0x000000a);
+	if (rc) {
+		printf("Failed to write software reset register\n");
+		return 1;
+	}
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	struct enet_dev *dev;
@@ -147,6 +160,10 @@ int main(int argc, char **argv)
 		printf("Failed to open device");
 		return 1;
 	}
+
+	rc = spi_software_reset(dev);
+	if (rc)
+		goto out;
 
 	rc = spi_read_device_id(dev);
 	if (rc)
